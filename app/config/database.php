@@ -55,7 +55,7 @@ return array(
 		'mysql' => array(
 			'driver'    => 'mysql',
 			'host'      => 'localhost',
-			'database'  => 'sonatask',
+			'database'  => 'conquer_floor',
 			'username'  => 'root',
 			'password'  => 'luhu',
 			'charset'   => 'utf8',

@@ -17,9 +17,19 @@ Route::get('/', function()
 });
 
 Route::resource('user', 'UserController');
+Route::resource('admin', 'AdminController');
+Route::resource('game', 'GameController');
 Route::resource('task', 'TaskController');
+Route::resource('round', 'RoundController');
+Route::resource('fighter', 'FighterController');
+Route::resource('fighterClass', 'FighterClassController');
 Route::post('user/sign_in', 'UserController@sign_in');
 Route::post('user/sign_up', 'UserController@sign_up');
 Route::post('user/log_off', 'UserController@log_off');
+Route::post('admin/sign_in', 'AdminController@sign_in');
 Route::post('task/sort', 'TaskController@sort');
 Route::post('task/create', 'TaskController@create');
+Route::post('game/create', 'GameController@create');
+Route::post('fighter/create', 'FighterController@create');
+Route::post('fighter/get_all', 'FighterController@get_all');
+

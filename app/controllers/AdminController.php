@@ -1,6 +1,6 @@
 <?php
 
-class UserController extends \BaseController {
+class AdminController extends \BaseController {
 
 	/**
 	 * Display a listing of the resource.
@@ -9,11 +9,11 @@ class UserController extends \BaseController {
 	 */
 	public function index()
 	{
-		if (Session::has('user')){
-			$user = Session::get('user');
-			return Response::json(array('user' => $user));
+		if (Session::has('admin')){
+			$admin = Session::get('admin');
+			return Response::json(array('admin' => $admin));
 		}else{
-			return Response::json(array('user' => false));
+			return Response::json(array('admin' => false));
 		}
 	}
 
@@ -25,22 +25,22 @@ class UserController extends \BaseController {
 	public function sign_in()
 	{
 		//
-		$user = Input::get('user');
+		$admin = Input::get('admin');
 		$pass = Input::get('password');
 		
-		$response = DB::table('users')
-			->select('iduser', 'realname', 'username')
+		$response = DB::table('admin')
+			->select('idadmin', 'username')
 			->where('password', $pass)
-			->where(function($query) use ($user) {
-				$query->orWhere('username', $user);
+			->where(function($query) use ($admin) {
+				$query->orWhere('username', $admin);
 			})
 			->get();
 		if(!$response)
-			return Response::json(array('user' => false));
+			return Response::json(array('admin' => false));
 		else{
-			Session::put('user', $response[0]);
+			Session::put('admin', $response[0]);
 			Session::save();
-			return Response::json(array('user' => Session::get('user')));
+			return Response::json(array('admin' => Session::get('admin')));
 		}
 	}
 
@@ -52,40 +52,39 @@ class UserController extends \BaseController {
 	public function sign_up()
 	{
 		//
-		$user = Input::get('username');
-		$realname = Input::get('realname');
+		$admin = Input::get('username');
 		$pass = Input::get('password');
 
-		$response = DB::table('users')
-			->select('iduser', 'realname', 'username')
+		$response = DB::table('admin')
+			->select('idadmin', 'username')
 			->where('password', $pass)
-			->where(function($query) use ($user) {
-				$query->orWhere('username', $user);
+			->where(function($query) use ($admin) {
+				$query->orWhere('username', $admin);
 			})
 			->get();
 		if(!$response){
-			DB::table('users')->insert(
-				array('realname' => $realname, 'username' => $user, 'password' => $pass)
+			DB::table('admin')->insert(
+				array('username' => $admin, 'password' => $pass)
 			);
 
-			$response = DB::table('users')
-				->select('iduser', 'realname', 'username')
+			$response = DB::table('admin')
+				->select('idadmin', 'username')
 				->where('password', $pass)
-				->where(function($query) use ($user) {
-					$query->orWhere('username', $user);
+				->where(function($query) use ($admin) {
+					$query->orWhere('username', $admin);
 				})
 				->get();
 			if(!$response)
-				return Response::json(array('user' => false));
+				return Response::json(array('admin' => false));
 			else{
-				Session::put('user', $response[0]);
+				Session::put('admin', $response[0]);
 				Session::save();
-				return Response::json(array('user' => Session::get('user')));
+				return Response::json(array('admin' => Session::get('admin')));
 			}
 		}else{
-			Session::put('user', $response[0]);
+			Session::put('admin', $response[0]);
 			Session::save();
-			return Response::json(array('user' => Session::get('user')));
+			return Response::json(array('admin' => Session::get('admin')));
 		}
 	}
 
@@ -98,7 +97,7 @@ class UserController extends \BaseController {
 	{
 		//
 		Session::flush();
-		return Response::json(array('user' => false));
+		return Response::json(array('admin' => false));
 	}
 
 
