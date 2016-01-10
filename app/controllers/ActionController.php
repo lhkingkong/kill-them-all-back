@@ -139,7 +139,6 @@ class ActionController extends \BaseController {
                 ->where('idround', '=', Input::get('round'))
 	            ->get();
 	        if(!$response){
-
 	        	$fighter =DB::table('fighters')
 		            ->where('iduser', '=', $user->iduser)
 	                ->where('idgame', '=', Input::get('game'))
@@ -152,6 +151,41 @@ class ActionController extends \BaseController {
 		            ->first();
 		        if(!$fighter_class){
 		        	return Response::json(array('output' => 'no class of user'));
+		        }
+
+		        // archer attack twice
+		        if($fighter_class->idclass==3 && Input::get('target2')){
+					$target_fighter =DB::table('fighters')
+			            ->where('iduser', '=', Input::get('target2'))
+		                ->where('idgame', '=', Input::get('game'))
+			            ->first();
+			        if(!$target_fighter){
+			        	return Response::json(array('output' => 'no fighter of target'));
+			        }
+			        $target_fighter_class =DB::table('classes')
+			            ->where('idclass', '=', $target_fighter->idclass)
+			            ->first();
+			        if(!$target_fighter_class){
+			        	return Response::json(array('output' => 'no class of target'));
+			        }
+
+			        $attack = $this->calculate_damage($fighter, $fighter_class, $target_fighter,$target_fighter_class);
+
+	              	$idaction = DB::table('actions')->insertGetId(
+						array(
+							'idgame' => Input::get('game'), 
+							'idround' => Input::get('round'),
+							'iduser' => $user->iduser,
+							'idfighter' => $fighter->idfighter,
+							'target' => $target,
+							'order' => 0,
+							'turn' => 0,
+							'status' => 0,
+							'damage' => $attack['damage'],
+							'critical' => $attack['critical'],
+							'effective' =>  $attack['effective']
+						)
+					);
 		        }
 
 		        $target_fighter =DB::table('fighters')
@@ -180,9 +214,9 @@ class ActionController extends \BaseController {
 						'order' => 0,
 						'turn' => 0,
 						'status' => 0,
-						'damage' => $attack->damage,
-						'critical' => $attack->critical,
-						'effective' => $attack->effective
+						'damage' => $attack['damage'],
+						'critical' => $attack['critical'],
+						'effective' =>  $attack['effective']
 					)
 				);
 				return Response::json(array('output' => 'inserted'));
@@ -297,6 +331,10 @@ class ActionController extends \BaseController {
 					        ->where('iduser', '=', $action->target)
 				            ->where('idgame', '=', $game)
 					        ->first();
+
+					    $TimelineController = new TimelineController();
+					    $TimelineController->create($action);
+
 					    $life_left = $action->target_fighter->hp - $action->damage;
 					    if($life_left<0){
 					    	$life_left = 0;

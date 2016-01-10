@@ -23,6 +23,7 @@ Route::resource('round', 'RoundController');
 Route::resource('fighter', 'FighterController');
 Route::resource('fighterClass', 'FighterClassController');
 Route::resource('action', 'ActionController');
+Route::resource('timeline', 'TimelineController');
 Route::post('user/sign_in', 'UserController@sign_in');
 Route::post('user/sign_up', 'UserController@sign_up');
 Route::post('user/log_off', 'UserController@log_off');

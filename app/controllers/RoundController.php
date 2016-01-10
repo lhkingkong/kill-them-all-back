@@ -69,13 +69,26 @@ class RoundController extends \BaseController {
 				$game = $GameController->getGameById(Input::get('game'))[0];
 				$fighters = $FighterController->get_all(Input::get('game'));
 				$action = '';
+				$action2 = false;
 				if(Session::has('user')){
 					$user = Session::get('user');
-					$action =DB::table('actions')
+					$response =DB::table('actions')
 			            ->where('iduser', '=', $user->iduser)
 		                ->where('idgame', '=', Input::get('game'))
 		                ->where('idround', '=', $round->round)
-			            ->first();
+			            ->get();
+			         
+			         $len = count($response);
+			         if($len>0){
+			         	$action = $response[0];
+			         	if(isset($response[1])){
+			         		$action2 = $response[1];
+			         	}
+			         }
+
+				}
+				if($action2){
+					return array('round' => $round, 'game' => $game, 'fighters' => $fighters, 'action' => $action, 'action2' => $action2);
 				}
 				return array('round' => $round, 'game' => $game, 'fighters' => $fighters, 'action' => $action);
 			}
@@ -130,79 +143,6 @@ class RoundController extends \BaseController {
 		}else
 			return Response::json(array('output' => 'not admin'));
 	}
-
-	/**
-	 * Store a newly created resource in storage.
-	 *
-	 * @return Response
-	 */
-	public function sort(){
-		//
-		if (Session::has('user')){
-			$user = Session::get('user');
-			$rows = 0;
-			$tasks = Input::get('sortedIDs');
-
-			$len= count($tasks);
-			for($i=0; $i<$len; $i++){
-				$rows = DB::table('task_by_user')
-	            ->where('task_id', '=', $tasks[$i])
-	            ->where('user_id', '=', $user->user_id)
-	            ->update(array('position' => $i));
-        	}
-
-			return Response::json(array('output' => $this->getTasks(), 'other'=> 'test'));
-		}else
-			return Response::json(array('output' => 'not logged'));
-	}
-
-	/**
-	 * Store a newly created resource in storage.
-	 *
-	 * @return Response
-	 */
-	public function store()
-	{
-
-		//
-		if (Session::has('user')){
-			$user = Session::get('user');
-			$task_id= Input::get('id');
-
-			$type = Input::get('taskType');
-
-			if($type==1){
-				$content = "";
-			}else{
-				$content = Input::get('content');
-			}
-
-			DB::table('tasks')
-            ->where('id', $task_id)
-            ->update(array(
-            		'title' => Input::get('title'), 
-					'content' => $content,
-					'exp_date' => Input::get('expDate'),
-					'task_type' => $type
-            	));
-
-            if($type==1){
-            	$listOptions = json_decode(json_encode(Input::get('listOptions')), FALSE);
-
-				DB::table('items')->where('task_id', '=', $task_id)->delete();
-
-				$len = count($listOptions);
-				for($i = 0;$i<$len; $i++){
-					DB::table('items')->insert(
-						array('task_id' => $task_id, 'content' => $listOptions[$i]->content, 'checked' => $listOptions[$i]->checked, 'position' => $i)
-					);
-				}
-			}
-			return Response::json(array('output' => $this->getTasks(), 'other'=> "test"));
-		}else
-			return Response::json(array('output' => 'not logged'));
-	}
-
 
 	/**
 	 * Display the specified resource.
