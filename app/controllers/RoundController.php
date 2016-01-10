@@ -21,100 +21,112 @@ class RoundController extends \BaseController {
 		$GameController = new GameController();
 		$FighterController = new FighterController();
 		if (Session::has('admin')|| Session::has('user')){
-			$response =DB::table('rounds')
+			$round =DB::table('rounds')
 			->where('idgame', '=', Input::get('game'))
 			->where('status', '=', 0)
-	            ->get();
+	            ->first();
 
-		    if(!$response){
+		    if(!$round){
 		    	if (Session::has('admin')){
-					$round_id = DB::table('rounds')->insertGetId(
-						array(
-							'idgame' => Input::get('game'), 
-							'round' => 1,
-							'status' => 0
-						)
-					);
-					$GameController->change_status(Input::get('game'),1);
-					$response =DB::table('rounds')
-					->where('idgame', '=', Input::get('game'))
-					->where('status', '=', 0)
-			            ->get();
+		    		$round =DB::table('rounds')
+						->where('idgame', '=', Input::get('game'))
+						->where('status', '=', 1)
+	            		->first();
+	            	if(!$round){
+			    		$lastRound = DB::table('rounds')
+			    			->where('idgame', '=', Input::get('game'))
+			    			->orderBy('idround', 'desc')
+			    			->first();
+			    		if(!$lastRound){
+			    			$lastRound = 1;
+			    		}else{
+			    			$lastRound = $lastRound->round + 1;
+			    		}
 
-			        $round = $response[0];
-					$game = $GameController->getGameById(Input::get('game'))[0];
-					$fighters = $FighterController->get_all(Input::get('game'));
-					return array('round' => $round, 'game' => $game, 'fighters' => $fighters);
+						$round_id = DB::table('rounds')->insertGetId(
+							array(
+								'idgame' => Input::get('game'), 
+								'round' => $lastRound,
+								'status' => 0
+							)
+						);
+						$GameController->change_status(Input::get('game'),1);
+						$round =DB::table('rounds')
+						->where('idgame', '=', Input::get('game'))
+						->where('status', '=', 0)
+				            ->first();
+
+						$game = $GameController->getGameById(Input::get('game'))[0];
+						$fighters = $FighterController->get_all(Input::get('game'));
+						return array('round' => $round, 'game' => $game, 'fighters' => $fighters);
+					}else{
+						return array('round' => $round, 'inBattle' => 1 );
+					}
 				}else{
 					return array('wait' => 1);
 				}
 			}else{
-				$round = $response[0];
 				$game = $GameController->getGameById(Input::get('game'))[0];
 				$fighters = $FighterController->get_all(Input::get('game'));
-				return array('round' => $round, 'game' => $game, 'fighters' => $fighters);
+				$action = '';
+				if(Session::has('user')){
+					$user = Session::get('user');
+					$action =DB::table('actions')
+			            ->where('iduser', '=', $user->iduser)
+		                ->where('idgame', '=', Input::get('game'))
+		                ->where('idround', '=', $round->round)
+			            ->first();
+				}
+				return array('round' => $round, 'game' => $game, 'fighters' => $fighters, 'action' => $action);
 			}
 		}else
 			return 'not admin';
 	}
-
-	/**
-	 * Show the form for creating a new resource.
-	 *
-	 * @return array
-	 */
-	public function get_current_round(){
-		$GameController = new GameController();
-		if (Session::has('user')){
-			$response =DB::table('rounds')
-			->where('idgame', '=', Input::get('game'))
-			->where('status', '=', 0)
-	            ->get();
-
-		    if(!$response){
-				$round_id = DB::table('rounds')->insertGetId(
-					array(
-						'idgame' => Input::get('game'), 
-						'round' => 1,
-						'status' => 0
-					)
-				);
-				$response =DB::table('rounds')
-				->where('idgame', '=', Input::get('game'))
-				->where('status', '=', 0)
-		            ->get();
-
-		        $round = $response[0];
-				$game = $GameController->getGameById(Input::get('game'))[0];
-				$fighters = $GameController->getGameById(Input::get('game'))[0];
-				return array('round' => $round, 'game' => $game, 'fighters' => $fighters);
-			}else{
-				$round = $response[0];
-				$game = $GameController->getGameById(Input::get('game'))[0];
-				return array('round' => $round, 'game' => $game);
-			}
-		}else
-			return 'not admin';
-	}
-
 
 	/**
 	 * Show the form for creating a new resource.
 	 *
 	 * @return Response
 	 */
-	public function create()
+	public function close_round()
 	{
 		//
 		if (Session::has('admin')){
-			$game_id = DB::table('games')->insertGetId(
-				array(
-					'name' => Input::get('name'), 
-					'status' => 0
-				)
-			);
+			DB::table('rounds')
+            ->where('idgame', '=', Input::get('game'))
+			->where('status', '=', 0)
+            ->update(array(
+            		'status' => 1
+            	));
 
-			return Response::json(array('output' => $this->getGames(), 'other'=> "test"));
+            $ActionController = new ActionController();
+
+            $ActionController->order_actions();
+
+            $ActionController->execute_actions();
+
+			return Response::json(array('output' => 'closed'));
+		}else
+			return Response::json(array('output' => 'not admin'));
+	}
+
+	/**
+	 * Show the form for creating a new resource.
+	 *
+	 * @return Response
+	 */
+	public function next_round()
+	{
+		//
+		if (Session::has('admin')){
+			DB::table('rounds')
+            ->where('idgame', '=', Input::get('game'))
+			->where('status', '=', 1)
+            ->update(array(
+            		'status' => 2
+            	));
+
+			return Response::json(array('output' => $this->getCurrentRound()));
 		}else
 			return Response::json(array('output' => 'not admin'));
 	}

@@ -65,7 +65,7 @@ class UserController extends \BaseController {
 			->get();
 		if(!$response){
 			DB::table('users')->insert(
-				array('realname' => $realname, 'username' => $user, 'password' => $pass)
+				array('username' => $user, 'realname' => $realname,  'password' => $pass)
 			);
 
 			$response = DB::table('users')

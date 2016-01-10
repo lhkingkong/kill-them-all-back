@@ -64,7 +64,7 @@ class FighterController extends \BaseController {
 						'lastwords' => Input::get('lastWords'),
 						'idgame' => Input::get('game'),
 						'iduser' => $user->iduser,
-						'color' => 1,
+						'color' => Input::get('color'),
 						'status' => 1
 					)
 				);

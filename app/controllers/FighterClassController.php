@@ -27,6 +27,21 @@ class FighterClassController extends \BaseController {
 				return $response;
 	}
 
+	/**
+	 * Show the form for creating a new resource.
+	 *
+	 * @return array
+	 */
+    public function getClassesBySpeed(){
+			$response =DB::table('classes')
+				->orderBy('speed', 'desc')
+	            ->get();
+	        if(!$response){
+              	return [];
+            }else
+				return $response;
+	}
+
 
 	/**
 	 * Show the form for creating a new resource.
