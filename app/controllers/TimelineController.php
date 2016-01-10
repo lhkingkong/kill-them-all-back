@@ -21,10 +21,14 @@ class TimelineController extends \BaseController {
     public function getTimeline(){
 		if (Session::has('admin')){
 			$user = Session::get('user');
-			if(Input::get('round')){
+			$round =DB::table('rounds')
+	                ->where('idgame', '=', Input::get('game'))
+	                ->where('status', '=', 1)
+		            ->first();
+			if($round){
 				$response =DB::table('timeline')
 	                ->where('idgame', '=', Input::get('game'))
-	                ->where('idround', '=', Input::get('round'))
+	                ->where('idround', '=', $round->round)
 	                ->orderBy('turn','asc')
 		            ->orderBy('order','asc')
 		            ->get();

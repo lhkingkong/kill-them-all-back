@@ -332,9 +332,6 @@ class ActionController extends \BaseController {
 				            ->where('idgame', '=', $game)
 					        ->first();
 
-					    $TimelineController = new TimelineController();
-					    $TimelineController->create($action);
-
 					    $life_left = $action->target_fighter->hp - $action->damage;
 					    if($life_left<0){
 					    	$life_left = 0;
@@ -342,6 +339,12 @@ class ActionController extends \BaseController {
 					    if($life_left>100){
 					    	$life_left = 100;
 					    }
+
+					    $action->target_fighter->hp = $life_left;
+
+					    $TimelineController = new TimelineController();
+					    $TimelineController->create($action);
+					    
 					    DB::table('fighters')
 		            	->where('idfighter', '=', $action->target_fighter->idfighter)
 		            	->update(array(
