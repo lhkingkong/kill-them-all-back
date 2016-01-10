@@ -155,8 +155,9 @@ class ActionController extends \BaseController {
 
 		        // archer attack twice
 		        if($fighter_class->idclass==3 && Input::get('target2')){
+		        	$target2 = Input::get('target2');
 					$target_fighter =DB::table('fighters')
-			            ->where('iduser', '=', Input::get('target2'))
+			            ->where('iduser', '=', $target2)
 		                ->where('idgame', '=', Input::get('game'))
 			            ->first();
 			        if(!$target_fighter){
@@ -177,7 +178,7 @@ class ActionController extends \BaseController {
 							'idround' => Input::get('round'),
 							'iduser' => $user->iduser,
 							'idfighter' => $fighter->idfighter,
-							'target' => $target,
+							'target' => $target2,
 							'order' => 0,
 							'turn' => 0,
 							'status' => 0,
