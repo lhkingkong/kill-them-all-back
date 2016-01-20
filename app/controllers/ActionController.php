@@ -337,8 +337,8 @@ class ActionController extends \BaseController {
 					    if($life_left<0){
 					    	$life_left = 0;
 					    }
-					    if($life_left>100){
-					    	$life_left = 100;
+					    if($life_left>$action->target_fighter->classhp){
+					    	$life_left = $action->target_fighter->classhp;
 					    }
 
 					    $action->target_fighter->hp = $life_left;

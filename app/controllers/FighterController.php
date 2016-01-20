@@ -43,6 +43,17 @@ class FighterController extends \BaseController {
 	{
 		//
 		if (Session::has('user')){
+			$round =DB::table('rounds')
+				->where('idgame', '=', Input::get('game'))
+				->orderBy('round','desc')
+	            ->first();
+	        if(!$round){
+	        	return Response::json(array('output' => 'no rounds registered'));
+	        }
+	        if($round->round>1 || $round->status==1){
+	        	return Response::json(array('output' => 'game started'));
+	        }
+
 			$user = Session::get('user');
 
 			$response =DB::table('fighters')

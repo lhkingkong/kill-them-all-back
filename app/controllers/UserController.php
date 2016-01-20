@@ -64,6 +64,16 @@ class UserController extends \BaseController {
 			})
 			->get();
 		if(!$response){
+			$response = DB::table('users')
+			->select('iduser', 'realname', 'username')
+			->where(function($query) use ($user) {
+				$query->orWhere('username', $user);
+			})
+			->get();
+			if($response){
+				return Response::json(array('user' => false));
+			}
+
 			DB::table('users')->insert(
 				array('username' => $user, 'realname' => $realname,  'password' => $pass)
 			);
