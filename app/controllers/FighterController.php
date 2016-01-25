@@ -100,62 +100,84 @@ class FighterController extends \BaseController {
 	 *
 	 * @return Response
 	 */
-	public function get_all($game){
+	public function get_all($game,$game_status){
 		
-			$response =DB::table('fighters')
+			$fighters =DB::table('fighters')
                 ->where('idgame', '=', $game)
 	            ->get();
-	        if(!$response){
+	        if(!$fighters){
               	return [];
-            }else
-            	return $response;
+            }else{
+            	if($game_status == 3){
+	            	foreach ($fighters as &$fighter) {
+						$fighter->info = $this->get_info_by_idfighter($fighter->idfighter);
+					}
+				}
+            	return $fighters;
+            }
 	}
 
-	/**
-	 * Store a newly created resource in storage.
-	 *
-	 * @return Response
-	 */
-	public function store()
+	public function get_info()
 	{
-
-		//
-		if (Session::has('user')){
-			$user = Session::get('user');
-			$task_id= Input::get('id');
-
-			$type = Input::get('taskType');
-
-			if($type==1){
-				$content = "";
-			}else{
-				$content = Input::get('content');
+		if(Input::get('fighters')){
+			$fighters = Input::get('fighters');
+			foreach ($fighters as &$fighter) {
+				$fighter['info'] = $this->get_info_by_idfighter($fighter['idfighter']);
 			}
-
-			DB::table('tasks')
-            ->where('id', $task_id)
-            ->update(array(
-            		'title' => Input::get('title'), 
-					'content' => $content,
-					'exp_date' => Input::get('expDate'),
-					'task_type' => $type
-            	));
-
-            if($type==1){
-            	$listOptions = json_decode(json_encode(Input::get('listOptions')), FALSE);
-
-				DB::table('items')->where('task_id', '=', $task_id)->delete();
-
-				$len = count($listOptions);
-				for($i = 0;$i<$len; $i++){
-					DB::table('items')->insert(
-						array('task_id' => $task_id, 'content' => $listOptions[$i]->content, 'checked' => $listOptions[$i]->checked, 'position' => $i)
-					);
-				}
+			return Response::json(array('output' => $fighters));
+		}else{
+			if (Session::has('user')){
+				$user = Session::get('user');
+				$fighter =DB::table('fighters')
+		            ->where('iduser', '=', $user->iduser)
+	                ->where('idgame', '=', Input::get('game'))
+		            ->first();
+		        if(!$fighter){
+	              	return Response::json(array('output' => 'no fighter'));
+	            }else
+					return Response::json(array('output' => $fighter, 'user' => $user));
 			}
-			return Response::json(array('output' => $this->getTasks(), 'other'=> "test"));
+		}
+	}
+
+	public function get_info_by_idfighter($idfighter)
+	{
+		$fighter =DB::table('fighters')
+			->where('idfighter', '=', $idfighter)
+			->where('idgame', '=', Input::get('game'))
+			->first();
+		if(!$fighter){
+			return array('fighter' => 'no fighter');
+		}
+		$UserController = new UserController();
+		$user = $UserController->get_user_by_id($fighter->iduser);
+		$TimelineController = new TimelineController();
+		$timeline = $TimelineController->get_time_line_by_idfighter($idfighter);
+		return array('fighter' => $fighter, 'user' => $user, 'timeline' => $timeline);
+	}
+
+	public function kill_fighter(){
+		if (Session::has('admin')){
+			DB::table('fighters')
+				->where('idfighter', '=', Input::get('fighter'))
+				->update(array(
+					'hp' => 0
+				));
+			return Response::json(array('output' => 'killed'));
 		}else
-			return Response::json(array('output' => 'not logged'));
+			return Response::json(array('output' => 'not admin'));
+	}
+
+	public function revive_fighter(){
+		if (Session::has('admin')){
+			DB::table('fighters')
+				->where('idfighter', '=', Input::get('fighter'))
+				->update(array(
+					'hp' => Input::get('hp')
+				));
+			return Response::json(array('output' => 'revived'));
+		}else
+			return 'not admin';
 	}
 
 

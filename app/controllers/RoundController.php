@@ -18,9 +18,10 @@ class RoundController extends \BaseController {
 	 * @return array
 	 */
 	public function getCurrentRound(){
-		$GameController = new GameController();
-		$FighterController = new FighterController();
 		if (Session::has('admin')|| Session::has('user')){
+			$GameController = new GameController();
+			$FighterController = new FighterController();
+
 			$round =DB::table('rounds')
 			->where('idgame', '=', Input::get('game'))
 			->where('status', '=', 0)
@@ -56,8 +57,8 @@ class RoundController extends \BaseController {
 						->where('status', '=', 0)
 				            ->first();
 
-						$game = $GameController->getGameById(Input::get('game'))[0];
-						$fighters = $FighterController->get_all(Input::get('game'));
+						$game = $GameController->getGameById(Input::get('game'));
+						$fighters = $FighterController->get_all(Input::get('game'), $game->status);
 						return array('round' => $round, 'game' => $game, 'fighters' => $fighters);
 					}else{
 						return array('round' => $round, 'inBattle' => 1 );
@@ -66,8 +67,8 @@ class RoundController extends \BaseController {
 					return array('wait' => 1);
 				}
 			}else{
-				$game = $GameController->getGameById(Input::get('game'))[0];
-				$fighters = $FighterController->get_all(Input::get('game'));
+				$game = $GameController->getGameById(Input::get('game'));
+				$fighters = $FighterController->get_all(Input::get('game'), $game->status);
 				$action = '';
 				$action2 = false;
 				if(Session::has('user')){

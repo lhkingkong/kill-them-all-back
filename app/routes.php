@@ -31,9 +31,13 @@ Route::post('admin/sign_in', 'AdminController@sign_in');
 Route::post('task/sort', 'TaskController@sort');
 Route::post('task/create', 'TaskController@create');
 Route::post('game/create', 'GameController@create');
+Route::post('game/end_game', 'GameController@end_game');
 Route::post('round/close_round', 'RoundController@close_round');
 Route::post('round/next_round', 'RoundController@next_round');
 Route::post('fighter/create', 'FighterController@create');
 Route::post('fighter/get_all', 'FighterController@get_all');
+Route::post('fighter/get_info', 'FighterController@get_info');
+Route::post('fighter/kill', 'FighterController@kill_fighter');
+Route::post('fighter/revive', 'FighterController@revive_fighter');
 Route::post('action/create', 'ActionController@create');
 

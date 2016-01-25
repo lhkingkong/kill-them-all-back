@@ -29,13 +29,10 @@ class GameController extends \BaseController {
 	 * @return array
 	 */
 	public function getGameById($id){
-		if (Session::has('admin')){
-			$response =DB::table('games')
-				->where('idgame', '=', $id)
-	            ->get();
-			return $response;
-		}else
-			return 'not admin';
+		$game =DB::table('games')
+			->where('idgame', '=', $id)
+			->first();
+		return $game;
 	}
 
 
@@ -78,29 +75,10 @@ class GameController extends \BaseController {
 			return Response::json(array('output' => 'not admin'));
 	}
 
-	/**
-	 * Store a newly created resource in storage.
-	 *
-	 * @return Response
-	 */
-	public function get_info(){
-		//
-		if (Session::has('user')){
-			$user = Session::get('user');
-			$rows = 0;
-			$tasks = Input::get('sortedIDs');
-
-			$len= count($tasks);
-			for($i=0; $i<$len; $i++){
-				$rows = DB::table('task_by_user')
-	            ->where('task_id', '=', $tasks[$i])
-	            ->where('user_id', '=', $user->user_id)
-	            ->update(array('position' => $i));
-        	}
-
-			return Response::json(array('output' => $this->getTasks(), 'other'=> 'test'));
-		}else
-			return Response::json(array('output' => 'not logged'));
+	public function end_game()
+	{
+		$this->change_status(Input::get('game'),3);
+		return Response::json(array('output' => 'ended'));
 	}
 
 

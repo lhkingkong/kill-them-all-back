@@ -99,6 +99,14 @@ class UserController extends \BaseController {
 		}
 	}
 
+	public function get_user_by_id($id){
+		$user = DB::table('users')
+			->select('iduser', 'realname', 'username')
+			->where('iduser', $id)
+			->first();
+		return $user;
+	}
+
 	/**
 	 * Show the form for creating a new resource.
 	 *

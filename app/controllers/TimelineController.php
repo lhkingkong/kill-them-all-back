@@ -35,6 +35,7 @@ class TimelineController extends \BaseController {
 			}else{
 				$response =DB::table('timeline')
 	                ->where('idgame', '=', Input::get('game'))
+	                ->orderBy('idround','asc')
 	                ->orderBy('turn','asc')
 		            ->orderBy('order','asc')
 		            ->get();
@@ -100,10 +101,18 @@ class TimelineController extends \BaseController {
 	 * @param  int  $id
 	 * @return Response
 	 */
-	public function show($id)
+	public function get_time_line_by_idfighter($idfighter)
 	{
-		//
-		return "show";
+		$response =DB::table('timeline')
+			->where('idgame', '=', Input::get('game'))
+			->where(function($query) use ($idfighter) {
+				$query->orWhere('idfighter', $idfighter);
+				$query->orWhere('target_idfighter', $idfighter);
+			})
+			->orderBy('turn','asc')
+			->orderBy('order','asc')
+			->get();
+		return $response;
 	}
 
 
