@@ -156,6 +156,70 @@ class FighterController extends \BaseController {
 		return array('fighter' => $fighter, 'user' => $user, 'timeline' => $timeline);
 	}
 
+	public function kill_random(){
+		if (Session::has('admin')){
+			$fighters =DB::table('fighters')
+				->where('idgame', '=', Input::get('game'))
+				->where('hp', '>', 0)
+				->orderBy(DB::raw('RAND()'))
+				->take(Input::get('kills'))
+				->get();
+			if(!$fighters){
+				return array('fighter' => 'no fighter');
+			}
+			foreach ($fighters as &$fighter) {
+				DB::table('fighters')
+				->where('idfighter', '=', $fighter->idfighter)
+				->update(array(
+					'hp' => 0
+				));
+
+				$action = (object) array(
+					'idaction' => 0,
+					'idgame' => Input::get('game'),
+					'idround' => Input::get('round'),
+					'iduser' => 0,
+					'idfighter' => 0,
+					'target' => $fighter->idfighter,
+					'order' => 0,
+					'turn' => 1,
+					'status' => 1,
+					'damage' => 100,
+					'critical' => 0,
+					'effective' =>  0,
+					'name' => 'Ice King (admin)',
+					'type' => 1,
+					'idclass' => 1,
+					'hp' => 100,
+					'color' => 1,
+					'killspeech' => '¿Te volviste reggaetonero?',
+					'gender' => 4,
+					'classhp' => 100,
+					'target_fighter' => (object) array(
+					 	'idfighter' => $fighter->idfighter,
+						'name' => $fighter->name,
+						'iduser' => $fighter->iduser,
+						'idgame' => $fighter->idgame,
+						'type' => $fighter->type,
+						'idclass' => $fighter->idclass,
+						'hp' => 0,
+						'status' => $fighter->status,
+						'color' => $fighter->color,
+						'lastwords' => $fighter->lastwords,
+						'gender' => $fighter->gender,
+						'classhp' => $fighter->classhp
+					)
+				);	
+						
+				$TimelineController = new TimelineController();
+				$TimelineController->create($action);
+			}
+			$fighters = $this->get_all(Input::get('game'), 1);
+			return Response::json(array('output' => $fighters));
+		}else
+			return Response::json(array('output' => 'not admin'));
+	}
+
 	public function kill_fighter(){
 		if (Session::has('admin')){
 			DB::table('fighters')

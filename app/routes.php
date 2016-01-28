@@ -38,6 +38,7 @@ Route::post('fighter/create', 'FighterController@create');
 Route::post('fighter/get_all', 'FighterController@get_all');
 Route::post('fighter/get_info', 'FighterController@get_info');
 Route::post('fighter/kill', 'FighterController@kill_fighter');
+Route::post('fighter/kill_random', 'FighterController@kill_random');
 Route::post('fighter/revive', 'FighterController@revive_fighter');
 Route::post('action/create', 'ActionController@create');
 

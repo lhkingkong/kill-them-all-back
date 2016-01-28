@@ -109,6 +109,7 @@ class TimelineController extends \BaseController {
 				$query->orWhere('idfighter', $idfighter);
 				$query->orWhere('target_idfighter', $idfighter);
 			})
+			->orderBy('idround','asc')
 			->orderBy('turn','asc')
 			->orderBy('order','asc')
 			->get();
