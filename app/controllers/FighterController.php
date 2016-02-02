@@ -108,11 +108,11 @@ class FighterController extends \BaseController {
 	        if(!$fighters){
               	return [];
             }else{
-            	if($game_status == 3){
+            	//if($game_status == 3){
 	            	foreach ($fighters as &$fighter) {
-						$fighter->info = $this->get_info_by_idfighter($fighter->idfighter);
+						$fighter->info = $this->get_info_by_idfighter($fighter->idfighter, $game_status);
 					}
-				}
+				//}
             	return $fighters;
             }
 	}
@@ -122,7 +122,7 @@ class FighterController extends \BaseController {
 		if(Input::get('fighters')){
 			$fighters = Input::get('fighters');
 			foreach ($fighters as &$fighter) {
-				$fighter['info'] = $this->get_info_by_idfighter($fighter['idfighter']);
+				$fighter['info'] = $this->get_info_by_idfighter($fighter['idfighter'],3);
 			}
 			return Response::json(array('output' => $fighters));
 		}else{
@@ -140,7 +140,7 @@ class FighterController extends \BaseController {
 		}
 	}
 
-	public function get_info_by_idfighter($idfighter)
+	public function get_info_by_idfighter($idfighter, $game_status)
 	{
 		$fighter =DB::table('fighters')
 			->where('idfighter', '=', $idfighter)
@@ -150,7 +150,11 @@ class FighterController extends \BaseController {
 			return array('fighter' => 'no fighter');
 		}
 		$UserController = new UserController();
-		$user = $UserController->get_user_by_id($fighter->iduser);
+		if($game_status == 3){
+			$user = $UserController->get_user_by_id($fighter->iduser);
+		}else{
+			$user = "";
+		}
 		$TimelineController = new TimelineController();
 		$timeline = $TimelineController->get_time_line_by_idfighter($idfighter);
 		return array('fighter' => $fighter, 'user' => $user, 'timeline' => $timeline);

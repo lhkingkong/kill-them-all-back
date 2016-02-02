@@ -287,17 +287,17 @@ class ActionController extends \BaseController {
 			*/
 			$critical = 0;
 
-			if($target_fighter_class->idclass == 1 && rand(1, 10)>6){
+			if($target_fighter_class->idclass == 1 && rand(1, 10)>7){
 				$damage /= 2;
 			}
-			if($target_fighter_class->idclass == 2 && rand(1, 10)>5 && $fighter->type == $target_fighter->type){
+			if($target_fighter_class->idclass == 2 && rand(1, 10)>6){// && $fighter->type == $target_fighter->type){
 				$damage *= (-1.5);
 				$damage = round($damage);
 			}
-			if($target_fighter_class->idclass == 3 && rand(1, 10)>9){
+			if($target_fighter_class->idclass == 3 && rand(1, 10)>8){
 				$damage = 0;
 			}
-			if($fighter_class->idclass == 4 && rand(1, 10)>7){
+			if($fighter_class->idclass == 4 && rand(1, 10)>6){
 				$damage *= 2;
 				$critical = 1;
 			}
